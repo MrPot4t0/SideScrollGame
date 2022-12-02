@@ -1,100 +1,107 @@
 import pygame
-import random
 
-width = 800
-heigth = 600
-done = False
 pygame.init()
-pygame.display.set_caption("Monteando")
-screen = pygame.display.set_mode((width,heigth))
-bg_load = pygame.image.load("resources\\Forest.jpg")
-bg = pygame.transform.scale(bg_load,(width,heigth))
-coin_image = pygame.transform.scale(pygame.image.load("resources\\coin.png").convert(),(40,45))
-JumpCount = 7
+
+screen_width = 800
+screen_height = int(screen_width * 0.8)
+
+screen = pygame.display.set_mode((screen_width,screen_height))
+pygame.display.set_caption("monteando")
+
+moving_left = False
+moving_right = False
 isjump = False
-speed = 5
-score = 0
+JumpCount = 4
 
-coin_list = pygame.sprite.Group()
-all_sprites = pygame.sprite.Group()
+#colors in RGB
+black = (0,0,0)
+white = (255,255,255)
+green = (0,255,0)
+red = (255,0,0)
+blue = (0,0,255)
+gray = (50,50,50)
 
-
-class Coin(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        brute_load = pygame.image.load("resources\\coin.png").convert()
-        self.image = pygame.transform.scale(brute_load,(25,30))
-        self.rect = self.image.get_rect()
+def draw_background():
+    screen.fill(gray)
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, char_type , x, y,speed,):
         super().__init__()
-        brute_load = pygame.image.load("resources\\personajes\\knight.png").convert()
-        self.image = pygame.transform.scale(brute_load,(70,80))
-        self.image.set_colorkey((0,0,0))
-        self.rect = self.image.get_rect()
+        self.speed = speed
+        self.direction = 1
+        self.flip = False
+        load = pygame.image.load('resources\entities\player\Knight.png')
+        self.img = pygame.transform.scale(load, (70,80))
+        self.rect = self.img.get_rect()
+        self.rect.center = (x,y)
+    
+    def move(self, moving_left,moving_right):
+        dx = 0
+        dy = 0
+        if moving_left:
+            dx = -self.speed
+            self.flip = False
+            self.direction = -1
+        if moving_right:
+            dx = self.speed
+            self.flip = True
+            self.direction = 1
+        
+        self.rect.x += dx
+        self.rect.y += dy
+    def draw(self):
+        screen.blit(pygame.transform.flip(self.img, self.flip ,False), self.rect)
 
-class colors():
-    black = (0,0,0)
-    white = (255,255,255)
-    green = (0,255,0)
-    red = (255,0,0)
-    blue = (0,0,255)
-    gray = (50,50,50)
+player = Player('player',200,200,3)
 
-for i in range(10):
-    coin = Coin()
-    coin.rect.x = random.randrange(100,800)
-    coin.rect.y = 487
+x = 200
+y = 200
 
-    coin_list.add(coin)
-    all_sprites.add(coin)
-
-for p in range(1):
-    player = Player()
-    player.rect.x = 0
-    player.rect.y = 440
-    all_sprites.add(player)
-
-while not done:
+Playing = True
+while Playing:
     pygame.time.Clock().tick(60)
+    draw_background()
+
+    player.move(moving_left,moving_right)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            done = True
+            Playing = False
+        #if player plays key this happens
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                moving_left = True
+            if event.key == pygame.K_RIGHT:
+                moving_right = True
+            if event.key == pygame.K_ESCAPE:
+                Playing = False
+        #if player stops pressing key this happen
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                moving_left = False
+            if event.key == pygame.K_RIGHT:
+                moving_right = False
+    
+    #keyboars events
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_LEFT] and player.rect.x > speed:
-        player.rect.x -= speed
-    if keys[pygame.K_RIGHT] and player.rect.x < width - speed - 70:
-        player.rect.x += speed
     if not(isjump):
-        if keys[pygame.K_UP] and player.rect.y > speed:
+        if keys[pygame.K_UP]:
             pass
-        if keys[pygame.K_DOWN] and player.rect.y < heigth - 80 * 2:
+        if keys[pygame.K_DOWN]:
             pass
         if keys[pygame.K_SPACE]:
             isjump = True
     else:
-        if JumpCount >= -7:
-            player.rect.y -= (JumpCount * abs(JumpCount)) * 1
-            JumpCount -= 1
+        if JumpCount >= -4:
+            player.rect.y -= (JumpCount * abs(JumpCount)) * 3
+            JumpCount -= 0.4
         else:
-            JumpCount = 7
+            JumpCount = 4
             isjump = False
-
-    coin_hit_list = pygame.sprite.spritecollide(player, coin_list, True)
-    for item in coin_hit_list:
-        score += 1
-
-    screen.blit(bg,[0,0])
-    screen.blit(coin_image, [10 , 10])
-    all_sprites.draw(screen)
-    font = pygame.font.Font("resources\\Fuentes\\Deutsch.ttf", 45)
-    text = font.render(str(score), 1, colors.white)
-    text2 = font.render('x',1, colors.white)
-    screen.blit(text2, (53,9))
-    screen.blit(text, (85,9))
-
-    pygame.display.flip()
     
+    
+    player.draw()
 
+    pygame.display.update()
+pygame.quit()
