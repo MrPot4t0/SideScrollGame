@@ -4,11 +4,10 @@ pygame.init()
 
 screen_width = 800
 screen_height = int(screen_width * 0.8)
-mc_width = 150
-mc_heigth = 150
+mc_width = 400
+mc_heigth = 400
 screen = pygame.display.set_mode((screen_width,screen_height))
 pygame.display.set_caption("monteando")
-
 moving_left = False
 moving_right = False
 isjump = False
@@ -23,7 +22,7 @@ blue = (0,0,255)
 gray = (50,50,50)
 
 def draw_background():
-    screen.fill(gray)
+    screen.fill(green)
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, char_type , x, y,speed,):
@@ -38,16 +37,16 @@ class Player(pygame.sprite.Sprite):
         self.update_time = pygame.time.get_ticks()
         temp_list = []
 
-        for i in range(12):
-            load = pygame.image.load(f'resources\entities\{self.char_type}\\walking{i}.png')
+        for i in range(4):
+            load = pygame.image.load(f'resources\entities\{self.char_type}\\walking\\walking{i}.png')
             img = pygame.transform.scale(load, (mc_width,mc_heigth))
             temp_list.append(img)
 
         self.animation_list.append(temp_list)
         temp_list = []
 
-        for i in range(1):
-            load = pygame.image.load(f'resources\entities\{self.char_type}\\static.png')
+        for i in range(1,5):
+            load = pygame.image.load(f'resources\entities\{self.char_type}\\idle\\idle ({i}).png')
             img = pygame.transform.scale(load, (mc_width,mc_heigth))
             temp_list.append(img)
         self.animation_list.append(temp_list)
@@ -72,7 +71,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y += dy
 
     def update_animation(self):
-        ANIMATION_COOLDOWN = 120
+        ANIMATION_COOLDOWN = 200
         self.img = self.animation_list[self.action][self.frame_index]
         
         if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
@@ -110,7 +109,6 @@ while Playing:
     player.move(moving_left,moving_right)
     #display everything
     player.draw()
-
     #update player action
     if moving_left or moving_right:
         player.update_action(0)
